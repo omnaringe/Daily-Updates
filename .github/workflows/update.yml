@@ -2,23 +2,34 @@ name: Daily Update
 
 on:
   schedule:
-    - cron: '0 6 * * *'
+    - cron: "0 6 * * *"
   workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
   update:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-      - name: Update Date
+      - name: Update date
         run: date > date.txt
 
-      - name: Commit Changes
+      - name: Commit changes
         run: |
-          git config user.name "github-actions"
-          git config user.email "github-actions@github.com"
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
           git add .
-          git diff --cached --quiet || git commit -m "Daily Update"
+
+          if git diff --cached --quiet; then
+            echo "No changes"
+            exit 0
+          fi
+
+          git commit -m "Daily Update"
           git push
